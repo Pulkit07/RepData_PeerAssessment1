@@ -1,0 +1,99 @@
+---
+title: "Peer Assessment 1 - Reproducible Research"
+output: html_document
+---
+
+### Loading and preprocessing the data.
+
+The data is downloaded and unzipped in our working directory and stored as "activity.csv". We read the data into a dataframe called data.
+```{r echo=TRUE}
+data<-read.csv("activity.csv",header=TRUE);
+str(data)
+```
+The dataframe has two integer and one factor variable.
+
+###Analysis on daily basis
+
+1. We can calculate the total number of steps taken per day by using tapply. The date variable is already a factor variable so we can use it to split the steps and then apply the sum function.
+```{r echo=TRUE}
+b<-tapply(data$steps,data$date,sum,na.rm=TRUE,simplify = TRUE)
+b
+```
+
+2. Difference between barplot and histogram and plotting the histogram.
+
+- Barplot : The variable on the x-axis is a categorical variable.  
+- Histogram : The variable on the x-axis is a quantitative variable.
+
+
+We plot the histogram using the hist function from base plotting system.
+```{r echo=TRUE}
+hist(b,col = "Red")
+```
+
+3. Mean of the total number of steps taken per day.
+```{r echo=TRUE}
+mean(b)
+```
+
+Median of the total number of steps taken per day.
+```{r echo=TRUE}
+median(b)
+```
+
+###Average daily activity pattern
+
+We created a new variable named c which contains the number of steps taken in that interval averaged across all days. Then we plot it using xyplot from lattice package.
+```{r echo=TRUE}
+data$c<-tapply(data$steps,as.factor(data$interval),mean,na.rm=TRUE,simplify = TRUE)
+library(lattice)
+xyplot(c~interval,data,type="l",xlab="Time Intervals",ylab = "Average no. of steps")
+```
+
+Finding the five minute interval that has maximum average number of steps.
+```{r echo=TRUE}
+res<-data$interval[which(data$c==max(data$c))]
+unique(res)
+```
+The five minute interval is 835.
+
+
+###Imputing missing values
+
+We will be using the average number of steps taken in that interval as the imputed value. We calculate the total number of entries containing NA's values.
+```{r echo=TRUE}
+mis<-which(complete.cases(data$steps,data$date,data$interval)==FALSE)
+length(mis)
+m<-which(is.na(data$steps)==TRUE)
+length(m)
+```
+The number of entries comtaining NA's is equal to the number os steps entries containing NA's and from summarizing the data we found that the NA's values are in the steps variable only.
+
+Creating a new dataset and replacing the NA values with the mean for that time interval.
+```{r echo=TRUE}
+newdata<-data
+newdata$steps[m]<-newdata$c[m]
+```
+
+Now finding the new total steps taken for each day by using tapply and then plotting a histogram and finding mean and median.
+```{r echo=TRUE}
+nb<-tapply(newdata$steps,newdata$date,sum,na.rm=TRUE,simplify = TRUE)
+nb
+hist(nb,col = "Blue")
+mean(nb)
+median(nb)
+```
+Oooh, the mean and median results the same. After imputing the NA's the mean and median are increased. The plan for imputing should have been much better.
+
+###Weekdays and Weekends
+
+Creating a new factor variable with two levels weekday and weekend. First we use the strptime and weekdays to find the weekday for each date and then we created a factor variable considering Sunday and Saturday as weekends and rest as weekdays.
+```{r echo=TRUE}
+newdata$day<-weekdays(strptime(newdata$date,"%Y-%m-%d"))
+newdata$dayt<-"weekday"
+newdata$dayt[which(newdata$day=="Saturday" | newdata$day=="Sunday")]="weekend"
+newdata$dayt<-as.factor(newdata$dayt)
+xyplot(c~interval|dayt,newdata,type="l",xlab="Time Intervals",ylab = "Average no. of steps")
+```
+
+From the plots we can see that there is not much difference in the weekends and weekdays as most of the weekends values are imputed in place of NA's.
