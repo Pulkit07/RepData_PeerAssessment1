@@ -3,7 +3,7 @@ title: "Peer Assessment 1 - Reproducible Research"
 output: html_document
 ---
 
-###Loading and preprocessing the data.
+### Loading and preprocessing the data.
 
 The data is downloaded and unzipped in our working directory and stored as "activity.csv". We read the data into a dataframe called data.
 
@@ -25,33 +25,18 @@ The dataframe has two integer and one factor variable.
 1. We can calculate the total number of steps taken per day by using tapply. The date variable is already a factor variable so we can use it to split the steps and then apply the sum function.
 
 ```r
-b<-tapply(data$steps,data$date,sum,na.rm=TRUE,simplify = TRUE)
-b
+b<-aggregate(steps~date,data=data,sum,simplify = TRUE)
+head(b)
 ```
 
 ```
-## 2012-10-01 2012-10-02 2012-10-03 2012-10-04 2012-10-05 2012-10-06 
-##          0        126      11352      12116      13294      15420 
-## 2012-10-07 2012-10-08 2012-10-09 2012-10-10 2012-10-11 2012-10-12 
-##      11015          0      12811       9900      10304      17382 
-## 2012-10-13 2012-10-14 2012-10-15 2012-10-16 2012-10-17 2012-10-18 
-##      12426      15098      10139      15084      13452      10056 
-## 2012-10-19 2012-10-20 2012-10-21 2012-10-22 2012-10-23 2012-10-24 
-##      11829      10395       8821      13460       8918       8355 
-## 2012-10-25 2012-10-26 2012-10-27 2012-10-28 2012-10-29 2012-10-30 
-##       2492       6778      10119      11458       5018       9819 
-## 2012-10-31 2012-11-01 2012-11-02 2012-11-03 2012-11-04 2012-11-05 
-##      15414          0      10600      10571          0      10439 
-## 2012-11-06 2012-11-07 2012-11-08 2012-11-09 2012-11-10 2012-11-11 
-##       8334      12883       3219          0          0      12608 
-## 2012-11-12 2012-11-13 2012-11-14 2012-11-15 2012-11-16 2012-11-17 
-##      10765       7336          0         41       5441      14339 
-## 2012-11-18 2012-11-19 2012-11-20 2012-11-21 2012-11-22 2012-11-23 
-##      15110       8841       4472      12787      20427      21194 
-## 2012-11-24 2012-11-25 2012-11-26 2012-11-27 2012-11-28 2012-11-29 
-##      14478      11834      11162      13646      10183       7047 
-## 2012-11-30 
-##          0
+##         date steps
+## 1 2012-10-02   126
+## 2 2012-10-03 11352
+## 3 2012-10-04 12116
+## 4 2012-10-05 13294
+## 5 2012-10-06 15420
+## 6 2012-10-07 11015
 ```
 
 2. Difference between barplot and histogram and plotting the histogram.
@@ -63,7 +48,7 @@ b
 We plot the histogram using the hist function from base plotting system.
 
 ```r
-hist(b,col = "Red")
+hist(b$steps,col = "Red",main="Total no. of Steps on a day",xlab = "No. of Steps")
 ```
 
 ![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
@@ -71,21 +56,21 @@ hist(b,col = "Red")
 3. Mean of the total number of steps taken per day.
 
 ```r
-mean(b)
+mean(b$steps)
 ```
 
 ```
-## [1] 9354.23
+## [1] 10766.19
 ```
 
 Median of the total number of steps taken per day.
 
 ```r
-median(b)
+median(b$steps)
 ```
 
 ```
-## [1] 10395
+## [1] 10765
 ```
 
 ###Average daily activity pattern
@@ -93,7 +78,7 @@ median(b)
 We created a new variable named c which contains the number of steps taken in that interval averaged across all days. Then we plot it using xyplot from lattice package.
 
 ```r
-data$c<-tapply(data$steps,as.factor(data$interval),mean,na.rm=TRUE,simplify = TRUE)
+data$c<-(aggregate(steps~interval,data=data,mean,simplify = TRUE))$steps
 library(lattice)
 xyplot(c~interval,data,type="l",xlab="Time Intervals",ylab = "Average no. of steps")
 ```
@@ -146,43 +131,28 @@ newdata$steps[m]<-newdata$c[m]
 Now finding the new total steps taken for each day by using tapply and then plotting a histogram and finding mean and median.
 
 ```r
-nb<-tapply(newdata$steps,newdata$date,sum,na.rm=TRUE,simplify = TRUE)
-nb
+nb<-aggregate(steps~date,data=newdata,sum,simplify = TRUE)
+head(nb)
 ```
 
 ```
-## 2012-10-01 2012-10-02 2012-10-03 2012-10-04 2012-10-05 2012-10-06 
-##   10766.19     126.00   11352.00   12116.00   13294.00   15420.00 
-## 2012-10-07 2012-10-08 2012-10-09 2012-10-10 2012-10-11 2012-10-12 
-##   11015.00   10766.19   12811.00    9900.00   10304.00   17382.00 
-## 2012-10-13 2012-10-14 2012-10-15 2012-10-16 2012-10-17 2012-10-18 
-##   12426.00   15098.00   10139.00   15084.00   13452.00   10056.00 
-## 2012-10-19 2012-10-20 2012-10-21 2012-10-22 2012-10-23 2012-10-24 
-##   11829.00   10395.00    8821.00   13460.00    8918.00    8355.00 
-## 2012-10-25 2012-10-26 2012-10-27 2012-10-28 2012-10-29 2012-10-30 
-##    2492.00    6778.00   10119.00   11458.00    5018.00    9819.00 
-## 2012-10-31 2012-11-01 2012-11-02 2012-11-03 2012-11-04 2012-11-05 
-##   15414.00   10766.19   10600.00   10571.00   10766.19   10439.00 
-## 2012-11-06 2012-11-07 2012-11-08 2012-11-09 2012-11-10 2012-11-11 
-##    8334.00   12883.00    3219.00   10766.19   10766.19   12608.00 
-## 2012-11-12 2012-11-13 2012-11-14 2012-11-15 2012-11-16 2012-11-17 
-##   10765.00    7336.00   10766.19      41.00    5441.00   14339.00 
-## 2012-11-18 2012-11-19 2012-11-20 2012-11-21 2012-11-22 2012-11-23 
-##   15110.00    8841.00    4472.00   12787.00   20427.00   21194.00 
-## 2012-11-24 2012-11-25 2012-11-26 2012-11-27 2012-11-28 2012-11-29 
-##   14478.00   11834.00   11162.00   13646.00   10183.00    7047.00 
-## 2012-11-30 
-##   10766.19
+##         date    steps
+## 1 2012-10-01 10766.19
+## 2 2012-10-02   126.00
+## 3 2012-10-03 11352.00
+## 4 2012-10-04 12116.00
+## 5 2012-10-05 13294.00
+## 6 2012-10-06 15420.00
 ```
 
 ```r
-hist(nb,col = "Blue")
+hist(nb$steps,col = "Blue",main="Total no. of Steps on a day",xlab = "No. of Steps")
 ```
 
 ![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10-1.png) 
 
 ```r
-mean(nb)
+mean(nb$steps)
 ```
 
 ```
@@ -190,7 +160,7 @@ mean(nb)
 ```
 
 ```r
-median(nb)
+median(nb$steps)
 ```
 
 ```
@@ -205,11 +175,11 @@ Creating a new factor variable with two levels weekday and weekend. First we use
 ```r
 newdata$day<-weekdays(strptime(newdata$date,"%Y-%m-%d"))
 newdata$dayt<-"weekday"
-newdata$dayt[which(newdata$day=="Saturday" | newdata$day=="Sunday")]="weekend"
+newdata$dayt[which(newdata$day=='Saturday' | newdata$day=='Sunday')]="weekend"
 newdata$dayt<-as.factor(newdata$dayt)
 xyplot(c~interval|dayt,newdata,type="l",xlab="Time Intervals",ylab = "Average no. of steps")
 ```
 
 ![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-1.png) 
 
-From the plots we can see that there is not much difference in the weekends and weekdays as most of the weekends values are imputed in place of NA's.
+From the plots we can see that there is not much difference in the weekends and weekdays as most of the weekends values are imputed in place of NA's and the mean values for each interval is used so plot seems the same and the NA values were there on the weekends only.

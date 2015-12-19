@@ -16,8 +16,8 @@ The dataframe has two integer and one factor variable.
 
 1. We can calculate the total number of steps taken per day by using tapply. The date variable is already a factor variable so we can use it to split the steps and then apply the sum function.
 ```{r echo=TRUE}
-b<-tapply(data$steps,data$date,sum,na.rm=TRUE,simplify = TRUE)
-b
+b<-aggregate(steps~date,data=data,sum,simplify = TRUE)
+head(b)
 ```
 
 2. Difference between barplot and histogram and plotting the histogram.
@@ -28,24 +28,24 @@ b
 
 We plot the histogram using the hist function from base plotting system.
 ```{r echo=TRUE}
-hist(b,col = "Red")
+hist(b$steps,col = "Red",main="Total no. of Steps on a day",xlab = "No. of Steps")
 ```
 
 3. Mean of the total number of steps taken per day.
 ```{r echo=TRUE}
-mean(b)
+mean(b$steps)
 ```
 
 Median of the total number of steps taken per day.
 ```{r echo=TRUE}
-median(b)
+median(b$steps)
 ```
 
 ###Average daily activity pattern
 
 We created a new variable named c which contains the number of steps taken in that interval averaged across all days. Then we plot it using xyplot from lattice package.
 ```{r echo=TRUE}
-data$c<-tapply(data$steps,as.factor(data$interval),mean,na.rm=TRUE,simplify = TRUE)
+data$c<-(aggregate(steps~interval,data=data,mean,simplify = TRUE))$steps
 library(lattice)
 xyplot(c~interval,data,type="l",xlab="Time Intervals",ylab = "Average no. of steps")
 ```
@@ -77,11 +77,11 @@ newdata$steps[m]<-newdata$c[m]
 
 Now finding the new total steps taken for each day by using tapply and then plotting a histogram and finding mean and median.
 ```{r echo=TRUE}
-nb<-tapply(newdata$steps,newdata$date,sum,na.rm=TRUE,simplify = TRUE)
-nb
-hist(nb,col = "Blue")
-mean(nb)
-median(nb)
+nb<-aggregate(steps~date,data=newdata,sum,simplify = TRUE)
+head(nb)
+hist(nb$steps,col = "Blue",main="Total no. of Steps on a day",xlab = "No. of Steps")
+mean(nb$steps)
+median(nb$steps)
 ```
 Oooh, the mean and median results the same. After imputing the NA's the mean and median are increased. The plan for imputing should have been much better.
 
@@ -91,9 +91,9 @@ Creating a new factor variable with two levels weekday and weekend. First we use
 ```{r echo=TRUE}
 newdata$day<-weekdays(strptime(newdata$date,"%Y-%m-%d"))
 newdata$dayt<-"weekday"
-newdata$dayt[which(newdata$day=="Saturday" | newdata$day=="Sunday")]="weekend"
+newdata$dayt[which(newdata$day=='Saturday' | newdata$day=='Sunday')]="weekend"
 newdata$dayt<-as.factor(newdata$dayt)
 xyplot(c~interval|dayt,newdata,type="l",xlab="Time Intervals",ylab = "Average no. of steps")
 ```
 
-From the plots we can see that there is not much difference in the weekends and weekdays as most of the weekends values are imputed in place of NA's.
+From the plots we can see that there is not much difference in the weekends and weekdays as most of the weekends values are imputed in place of NA's and the mean values for each interval is used so plot seems the same and the NA values were there on the weekends only.
